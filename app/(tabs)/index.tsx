@@ -20,6 +20,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text>Calendar Module Example</Text>
       <Button title="Create a new calendar" onPress={createCalendar} />
+      <Button title="Create a new event" onPress={createCalendarEvent} />
     </View>
   );
 }
@@ -45,6 +46,10 @@ async function createCalendar() {
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
   console.log(`Your new calendar ID is: ${newCalendarID}`);
+}
+
+async function createCalendarEvent() {
+  Calendar.createEventInCalendarAsync();
 }
 
 const styles = StyleSheet.create({
