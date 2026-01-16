@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import * as Calendar from "expo-calendar";
 import { add, startOfToday } from "date-fns";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
@@ -44,23 +45,29 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text>Calendar Module Example</Text>
-      {events.length > 0 && events !== undefined && (
-        <View>
-          {events.map((event) => (
-            <View key={event.id}>
-              <Text>Event title</Text>
-              <Text>{event.title}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-      <Button title="Create a new calendar" onPress={createCalendar} />
-      <Button title="List calendars" onPress={listCalendars} />
-      <Button title="List events" onPress={listEvents} />
-      <Button title="Create a new event" onPress={createCalendarEvent} />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text>Welcome User</Text>
+        <Text>
+          You have <Text style={{ fontWeight: "bold" }}>4</Text> Events today
+        </Text>
+      </View>
+      <View style={styles.content}>
+        {events.length > 0 && events !== undefined && (
+          <View style={styles.events}>
+            {events.map((event) => (
+              <View key={event.id} style={styles.event}>
+                <Text>{event.title}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        <Button title="Create a new calendar" onPress={createCalendar} />
+        <Button title="List calendars" onPress={listCalendars} />
+        <Button title="List events" onPress={listEvents} />
+        <Button title="Create a new event" onPress={createCalendarEvent} />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -106,5 +113,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-around",
+  },
+  header: {
+    flexDirection: "column",
+    alignItems: "center",
+    alignContent: "center",
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  events: {
+    alignItems: "center",
+  },
+  event: {
+    paddingBottom: 4,
   },
 });
