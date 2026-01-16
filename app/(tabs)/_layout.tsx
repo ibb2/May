@@ -20,10 +20,10 @@ export default function TabLayout() {
           drawable="custom_android_drawable"
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="explore">
+      {/*<NativeTabs.Trigger name="explore">
         <Label>3 Days</Label>
         <Icon sf="rectangle.split.3x1" drawable="custom_plane_drawable" />
-      </NativeTabs.Trigger>
+      </NativeTabs.Trigger>*/}
       <NativeTabs.Trigger name="search" role="search">
         <Label>Search</Label>
         <Icon sf="plus" drawable="custom_plane_drawable" />
