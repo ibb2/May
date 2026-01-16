@@ -83,7 +83,8 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={{ fontSize: 16, fontWeight: "500" }}>Welcome User</Text>
         <Text style={{ fontSize: 20, fontWeight: "300" }}>
-          You have <Text style={{ fontWeight: "600" }}>4</Text> Events today
+          You have <Text style={{ fontWeight: "600" }}>{events?.length}</Text>{" "}
+          Events today
         </Text>
       </View>
       <View style={styles.content}>
@@ -106,7 +107,9 @@ export default function HomeScreen() {
                       borderRadius: 100,
                     }}
                   ></View>
-                  <Text>{event.title}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: "500" }}>
+                    {event.title}
+                  </Text>
                 </View>
               ))}
             </View>
