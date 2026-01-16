@@ -1,8 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import * as Calendar from "expo-calendar";
+import { add, startOfToday } from "date-fns";
 
 export default function HomeScreen() {
+  const [events, setEvents] = useState<Calendar.Event[]>([]);
+
+  async function listEvents() {
+    const startDate = startOfToday();
+    const endDate = add(startDate, { days: 1 });
+    const events = await Calendar.getEventsAsync(
+      ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+      startDate,
+      endDate,
+    );
+    console.log("Events");
+    console.log(events);
+    setEvents(events);
+  }
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -14,12 +30,35 @@ export default function HomeScreen() {
         console.log({ calendars });
       }
     })();
+
+    (async () => {
+      const startDate = startOfToday();
+      const endDate = add(startDate, { days: 1 });
+      const events = await Calendar.getEventsAsync(
+        ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+        startDate,
+        endDate,
+      );
+      setEvents(events);
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
       <Text>Calendar Module Example</Text>
+      {events.length > 0 && events !== undefined && (
+        <View>
+          {events.map((event) => (
+            <View key={event.id}>
+              <Text>Event title</Text>
+              <Text>{event.title}</Text>
+            </View>
+          ))}
+        </View>
+      )}
       <Button title="Create a new calendar" onPress={createCalendar} />
+      <Button title="List calendars" onPress={listCalendars} />
+      <Button title="List events" onPress={listEvents} />
       <Button title="Create a new event" onPress={createCalendarEvent} />
     </View>
   );
@@ -46,6 +85,15 @@ async function createCalendar() {
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
   console.log(`Your new calendar ID is: ${newCalendarID}`);
+}
+
+async function listCalendars() {
+  const calendars = await Calendar.getCalendarsAsync(
+    Calendar.EntityTypes.EVENT,
+  );
+
+  console.log("Here are all your calendars:");
+  console.log({ calendars });
 }
 
 async function createCalendarEvent() {
