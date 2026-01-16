@@ -62,11 +62,9 @@ export default function HomeScreen() {
             ))}
           </View>
         )}
-        <Button title="Create a new calendar" onPress={createCalendar} />
-        <Button title="List calendars" onPress={listCalendars} />
-        <Button title="List events" onPress={listEvents} />
-        <Button title="Create a new event" onPress={createCalendarEvent} />
       </View>
+      <Button title="List events" onPress={listEvents} />
+      <Button title="List calendars" onPress={listCalendars} />
     </SafeAreaView>
   );
 }
