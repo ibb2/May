@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import * as Calendar from "expo-calendar";
-import { add, startOfToday } from "date-fns";
+import { add, getDate, getDay, getWeek, startOfToday } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
+  const [calendars, setCalendars] = useState<Calendar.Calendar[]>([]);
 
   async function listEvents() {
     const startDate = startOfToday();
@@ -20,6 +22,37 @@ export default function HomeScreen() {
     setEvents(events);
   }
 
+  async function getDayAsString() {
+    const d = getDay(new Date());
+    let day = "Monday";
+
+    switch (d) {
+      case 1:
+        day = "Monday";
+        break;
+      case 2:
+        day = "Tuesday";
+        break;
+      case 3:
+        day = "Wednesday";
+        break;
+      case 4:
+        day = "Thursday";
+        break;
+      case 5:
+        day = "Friday";
+        break;
+      case 6:
+        day = "Saturday";
+        break;
+      case 7:
+        day = "Sunday";
+        break;
+    }
+
+    return day;
+  }
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -27,6 +60,7 @@ export default function HomeScreen() {
         const calendars = await Calendar.getCalendarsAsync(
           Calendar.EntityTypes.EVENT,
         );
+        setCalendars(calendars);
         console.log("Here are all your calendars:");
         console.log({ calendars });
       }
@@ -53,15 +87,31 @@ export default function HomeScreen() {
         </Text>
       </View>
       <View style={styles.content}>
-        {events.length > 0 && events !== undefined && (
-          <View style={styles.events}>
-            {events.map((event) => (
-              <View key={event.id} style={styles.event}>
-                <Text>{event.title}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        <View style={styles.dateContainer}>
+          <Text style={styles.date}>{getDate(new Date())}</Text>
+          <Text style={styles.date}>{getDayAsString()}</Text>
+        </View>
+        <View style={styles.eventsContainer}>
+          {events.length > 0 && events !== undefined && (
+            <View style={styles.events}>
+              {events.map((event) => (
+                <View key={event.id} style={styles.event}>
+                  <View
+                    style={{
+                      backgroundColor:
+                        calendars.find((c) => c.id === event.calendarId)
+                          ?.color || "red",
+                      width: 10,
+                      height: 10,
+                      borderRadius: 100,
+                    }}
+                  ></View>
+                  <Text>{event.title}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
       <Button title="List events" onPress={listEvents} />
       <Button title="List calendars" onPress={listCalendars} />
@@ -119,12 +169,28 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    justifyContent: "center",
+    padding: 16,
+  },
+  dateContainer: {
+    alignItems: "center",
+    padding: 16,
+  },
+  date: {
+    fontSize: 60,
+    fontWeight: "800",
+  },
+  eventsContainer: {
+    alignItems: "center",
     padding: 16,
   },
   events: {
     alignItems: "center",
   },
   event: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
     paddingBottom: 4,
   },
 });
