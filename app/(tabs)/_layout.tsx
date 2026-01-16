@@ -14,18 +14,19 @@ export default function TabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Label>Home</Label>
-        <Icon sf="house.fill" drawable="custom_android_drawable" />
+        <Label>Today</Label>
+        <Icon
+          sf="distribute.vertical.fill"
+          drawable="custom_android_drawable"
+        />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="explore">
-        <Label>Index</Label>
-        <Icon sf="paperplane.fill" drawable="custom_plane_drawable" />
+        <Label>3 Days</Label>
+        <Icon sf="rectangle.split.3x1" drawable="custom_plane_drawable" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search" role="search">
-        <Pressable>
-          <Label>Search</Label>
-          <Icon sf="paperplane.fill" drawable="custom_plane_drawable" />
-        </Pressable>
+        <Label>Search</Label>
+        <Icon sf="plus" drawable="custom_plane_drawable" />
       </NativeTabs.Trigger>
     </NativeTabs>
     // <Tabs
