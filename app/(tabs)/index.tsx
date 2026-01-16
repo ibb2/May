@@ -93,7 +93,7 @@ export default function HomeScreen() {
           <Text style={styles.date}>{getDayAsString()}</Text>
         </View>
         <View style={styles.eventsContainer}>
-          {events.length > 0 && events !== undefined && (
+          {events.length > 0 && events !== undefined ? (
             <View style={styles.events}>
               {events.map((event) => (
                 <View key={event.id} style={styles.event}>
@@ -113,6 +113,8 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
+          ) : (
+            <Text>You have no events today</Text>
           )}
         </View>
       </View>
