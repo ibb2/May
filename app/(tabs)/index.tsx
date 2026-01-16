@@ -81,9 +81,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text>Welcome User</Text>
-        <Text>
-          You have <Text style={{ fontWeight: "bold" }}>4</Text> Events today
+        <Text style={{ fontSize: 16, fontWeight: "500" }}>Welcome User</Text>
+        <Text style={{ fontSize: 20, fontWeight: "300" }}>
+          You have <Text style={{ fontWeight: "600" }}>4</Text> Events today
         </Text>
       </View>
       <View style={styles.content}>
