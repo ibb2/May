@@ -1,8 +1,19 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import * as Calendar from "expo-calendar";
-import { add, getDate, getDay, getWeek, startOfToday } from "date-fns";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  add,
+  format,
+  getDate,
+  getDay,
+  getTime,
+  getWeek,
+  startOfToday,
+} from "date-fns";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export default function HomeScreen() {
@@ -53,6 +64,8 @@ export default function HomeScreen() {
     return day;
   }
 
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -79,7 +92,13 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View
+      className="flex-1 flex-col items-center justify-around"
+      style={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
+    >
       <View style={styles.header}>
         <Text style={{ fontSize: 16, fontWeight: "500" }}>Welcome User</Text>
         <Text style={{ fontSize: 20, fontWeight: "300" }}>
@@ -110,6 +129,9 @@ export default function HomeScreen() {
                   <Text style={{ fontSize: 16, fontWeight: "500" }}>
                     {event.title}
                   </Text>
+                  <Text className="text-muted">
+                    {format(event.startDate, "h:mm b")}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -120,7 +142,7 @@ export default function HomeScreen() {
       </View>
       <Button title="List events" onPress={listEvents} />
       <Button title="List calendars" onPress={listCalendars} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -161,12 +183,6 @@ async function createCalendarEvent() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "space-around",
-  },
   header: {
     flexDirection: "column",
     alignItems: "center",
