@@ -4,6 +4,7 @@ import * as Calendar from "expo-calendar";
 import { add, startOfToday } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
+import { useCalendar } from "@/stores/use-calendar";
 
 export default function SearchScreen() {
   /**
@@ -15,6 +16,9 @@ export default function SearchScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
   const [opened, onOpened] = useState<boolean>(false);
 
+  // Store
+  const updateEvents = useCalendar((state) => state.updateEvents);
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -23,6 +27,7 @@ export default function SearchScreen() {
         const results = await Calendar.createEventInCalendarAsync();
 
         if (results.action) {
+          updateEvents(true);
           router.push("/(tabs)");
         }
       }

@@ -15,10 +15,18 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { useCalendar } from "@/stores/use-calendar";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
   const [calendars, setCalendars] = useState<Calendar.Calendar[]>([]);
+
+  // Store
+  const eventUpdated = useCalendar((state) => state.eventUpdated);
+  const updateEvents = useCalendar((state) => state.updateEvents);
+
+  const startDate = startOfToday();
+  const endDate = add(startDate, { days: 1 });
 
   async function listEvents() {
     const startDate = startOfToday();
@@ -66,18 +74,21 @@ export default function HomeScreen() {
 
   const insets = useSafeAreaInsets();
 
-  setInterval(async () => {
-    // Interval set to every 1 second for now, performance is stable.
-    const startDate = startOfToday();
-    const endDate = add(startDate, { days: 1 });
-    const events = await Calendar.getEventsAsync(
-      ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-      startDate,
-      endDate,
-    );
-    setEvents(events);
-    // console.log("Fetching events");
-  }, 1000);
+  const getEvents = async () => {
+    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    if (status === "granted") {
+      // Interval set to every 1 second for now, performance is stable.
+      const events = await Calendar.getEventsAsync(
+        ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+        startDate,
+        endDate,
+      );
+      setEvents(events);
+      updateEvents(false);
+      // console.log("Fetching events");
+    }
+  };
+  getEvents();
 
   useEffect(() => {
     (async () => {
@@ -91,7 +102,22 @@ export default function HomeScreen() {
         console.log({ calendars });
       }
     })();
-  }, []);
+
+    (async () => {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === "granted" && eventUpdated) {
+        // Interval set to every 1 second for now, performance is stable.
+        const events = await Calendar.getEventsAsync(
+          ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+          startDate,
+          endDate,
+        );
+        setEvents(events);
+        updateEvents(false);
+        // console.log("Fetching events");
+      }
+    })();
+  }, [eventUpdated, updateEvents]);
 
   return (
     <View
