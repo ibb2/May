@@ -108,8 +108,8 @@ export default function HomeScreen() {
           Events today
         </Text>
       </View>
-      <View style={styles.content}>
-        <View style={styles.dateContainer}>
+      <View className="flex-1 items-center justify-center">
+        <View className="items-center p-16">
           <Text style={styles.date}>{getDate(new Date())}</Text>
           <Text style={styles.date}>{getDayAsString()}</Text>
         </View>
@@ -142,7 +142,6 @@ export default function HomeScreen() {
           )}
         </View>
       </View>
-      <Button title="List calendars" onPress={listCalendars} />
     </View>
   );
 }
@@ -188,15 +187,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     alignContent: "center",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 16,
-  },
-  dateContainer: {
-    alignItems: "center",
-    padding: 16,
   },
   date: {
     fontSize: 60,
