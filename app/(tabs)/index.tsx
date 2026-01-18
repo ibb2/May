@@ -66,6 +66,19 @@ export default function HomeScreen() {
 
   const insets = useSafeAreaInsets();
 
+  setInterval(async () => {
+    // Interval set to every 1 second for now, performance is stable.
+    const startDate = startOfToday();
+    const endDate = add(startDate, { days: 1 });
+    const events = await Calendar.getEventsAsync(
+      ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+      startDate,
+      endDate,
+    );
+    setEvents(events);
+    // console.log("Fetching events");
+  }, 1000);
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -77,17 +90,6 @@ export default function HomeScreen() {
         console.log("Here are all your calendars:");
         console.log({ calendars });
       }
-    })();
-
-    (async () => {
-      const startDate = startOfToday();
-      const endDate = add(startDate, { days: 1 });
-      const events = await Calendar.getEventsAsync(
-        ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-        startDate,
-        endDate,
-      );
-      setEvents(events);
     })();
   }, []);
 
@@ -140,7 +142,6 @@ export default function HomeScreen() {
           )}
         </View>
       </View>
-      <Button title="List events" onPress={listEvents} />
       <Button title="List calendars" onPress={listCalendars} />
     </View>
   );
