@@ -1,16 +1,16 @@
 import { useCalendar } from "@/stores/use-calendar";
 import {
-  add,
-  format,
-  getDate,
-  getDay,
-  startOfToday
+    add,
+    format,
+    getDate,
+    getDay,
+    startOfToday
 } from "date-fns";
 import * as Calendar from "expo-calendar";
 import { useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import {
-  useSafeAreaInsets
+    useSafeAreaInsets
 } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -37,87 +37,49 @@ export default function HomeScreen() {
     setEvents(events);
   }
 
-  async function getDayAsString() {
+  function getDayAsString() {
     const d = getDay(new Date());
-    let day = "Monday";
-
     switch (d) {
-      case 1:
-        day = "Monday";
-        break;
-      case 2:
-        day = "Tuesday";
-        break;
-      case 3:
-        day = "Wednesday";
-        break;
-      case 4:
-        day = "Thursday";
-        break;
-      case 5:
-        day = "Friday";
-        break;
-      case 6:
-        day = "Saturday";
-        break;
-      case 7:
-        day = "Sunday";
-        break;
+      case 1: return "Monday";
+      case 2: return "Tuesday";
+      case 3: return "Wednesday";
+      case 4: return "Thursday";
+      case 5: return "Friday";
+      case 6: return "Saturday";
+      case 0: return "Sunday"; // getDay returns 0 for Sunday
+      default: return "Monday";
     }
-
-    return day;
   }
 
   const insets = useSafeAreaInsets();
 
-  const getEvents = async () => {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
-    if (status === "granted") {
-      // Interval set to every 1 second for now, performance is stable.
-      const events = await Calendar.getEventsAsync(
-        ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-        startDate,
-        endDate,
-      );
-      setEvents(events);
-      updateEvents(false);
-      // console.log("Fetching events");
-    }
-  };
-  getEvents();
+
 
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === "granted") {
-        const calendars = await Calendar.getCalendarsAsync(
-          Calendar.EntityTypes.EVENT,
-        );
-        setCalendars(calendars);
-        console.log("Here are all your calendars:");
-        console.log({ calendars });
-      }
-    })();
+        const [calendars, events] = await Promise.all([
+          Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT),
+          Calendar.getEventsAsync(
+            ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
+            startDate,
+            endDate,
+          ),
+        ]);
 
-    (async () => {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
-      if (status === "granted" && eventUpdated) {
-        // Interval set to every 1 second for now, performance is stable.
-        const events = await Calendar.getEventsAsync(
-          ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-          startDate,
-          endDate,
-        );
+        setCalendars(calendars);
         setEvents(events);
         updateEvents(false);
-        // console.log("Fetching events");
+
+        console.log("Calendars and events fetched successfully");
       }
     })();
-  }, [eventUpdated, updateEvents]);
+  }, [eventUpdated, updateEvents, startDate, endDate]);
 
   return (
     <View
-      className="flex-1 flex-col items-center justify-around dark:bg-[#18181B]"
+      className="flex-1 flex-col items-center justify-around bg-[#000000] dark:bg-[#18181B]"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
