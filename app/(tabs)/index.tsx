@@ -1,21 +1,17 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Button, Platform } from "react-native";
-import * as Calendar from "expo-calendar";
+import { useCalendar } from "@/stores/use-calendar";
 import {
   add,
   format,
   getDate,
   getDay,
-  getTime,
-  getWeek,
-  startOfToday,
+  startOfToday
 } from "date-fns";
+import * as Calendar from "expo-calendar";
+import { useEffect, useState } from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+  useSafeAreaInsets
 } from "react-native-safe-area-context";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
-import { useCalendar } from "@/stores/use-calendar";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
@@ -121,26 +117,26 @@ export default function HomeScreen() {
 
   return (
     <View
-      className="flex-1 flex-col items-center justify-around"
+      className="flex-1 flex-col items-center justify-around dark:bg-[#18181B]"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
       }}
     >
       <View style={styles.header}>
-        <Text style={{ fontSize: 16, fontWeight: "500" }}>Welcome User</Text>
-        <Text style={{ fontSize: 20, fontWeight: "300" }}>
-          You have <Text style={{ fontWeight: "600" }}>{events?.length}</Text>{" "}
+        <Text className="text-lg dark:text-muted">Welcome User</Text>
+        <Text className="text-xl font-normal dark:text-foreground">
+          You have <Text className="text-xl font-semibold dark:text-foreground">{events?.length}</Text>{" "}
           Events today
         </Text>
       </View>
       <View className="flex-1 items-center justify-center">
         <View className="items-center p-16">
-          <Text style={styles.date}>{getDate(new Date())}</Text>
-          <Text style={styles.date}>{getDayAsString()}</Text>
+          <Text style={styles.date} className="text-foreground -m-2">{getDate(new Date())}</Text>
+          <Text style={styles.date} className="text-foreground">{getDayAsString()}</Text>
         </View>
         <View style={styles.eventsContainer}>
-          {events.length > 0 && events !== undefined ? (
+          {events.length > 0 && events !== undefined && (
             <View style={styles.events}>
               {events.map((event) => (
                 <View key={event.id} style={styles.event}>
@@ -154,7 +150,7 @@ export default function HomeScreen() {
                       borderRadius: 100,
                     }}
                   ></View>
-                  <Text style={{ fontSize: 16, fontWeight: "500" }}>
+                  <Text style={{ fontSize: 16, fontWeight: "500" }} className="text-foreground">
                     {event.title}
                   </Text>
                   <Text className="text-muted">
@@ -163,8 +159,6 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
-          ) : (
-            <Text>You have no events today</Text>
           )}
         </View>
       </View>
