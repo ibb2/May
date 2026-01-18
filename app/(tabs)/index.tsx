@@ -1,17 +1,10 @@
 import { useCalendar } from "@/stores/use-calendar";
-import {
-  add,
-  format,
-  getDate,
-  getDay,
-  startOfToday
-} from "date-fns";
+import { add, format, getDate, getDay, set, startOfToday } from "date-fns";
 import * as Calendar from "expo-calendar";
-import { useEffect, useState } from "react";
+import { Redirect, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import {
-  useSafeAreaInsets
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
@@ -20,6 +13,7 @@ export default function HomeScreen() {
   // Store
   const eventUpdated = useCalendar((state) => state.eventUpdated);
   const updateEvents = useCalendar((state) => state.updateEvents);
+  const setup = useCalendar((state) => state.setup);
 
   const startDate = startOfToday();
   const endDate = add(startDate, { days: 1 });
@@ -27,14 +21,22 @@ export default function HomeScreen() {
   function getDayAsString() {
     const d = getDay(new Date());
     switch (d) {
-      case 1: return "Monday";
-      case 2: return "Tuesday";
-      case 3: return "Wednesday";
-      case 4: return "Thursday";
-      case 5: return "Friday";
-      case 6: return "Saturday";
-      case 0: return "Sunday"; // getDay returns 0 for Sunday
-      default: return "Monday";
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 0:
+        return "Sunday"; // getDay returns 0 for Sunday
+      default:
+        return "Monday";
     }
   }
 
@@ -62,6 +64,8 @@ export default function HomeScreen() {
     })();
   }, [eventUpdated, updateEvents, startDate, endDate]);
 
+  if (!setup) return <Redirect href={"/setup"} />;
+
   return (
     <View
       className="flex-1 flex-col items-center justify-around bg-[#FCFCFC] dark:bg-[#18181B]"
@@ -73,30 +77,41 @@ export default function HomeScreen() {
       <View className="flex items-center">
         <Text className="text-lg text-muted">Welcome User</Text>
         <Text className="text-xl font-normal dark:text-foreground">
-          You have <Text className="text-xl font-semibold dark:text-foreground">{events?.length}</Text>{" "}
+          You have{" "}
+          <Text className="text-xl font-semibold dark:text-foreground">
+            {events?.length}
+          </Text>{" "}
           Events today
         </Text>
       </View>
       <View className="flex-1 items-center justify-center gap-8">
         <View className="items-center gap-2">
-                    <Text className="text-2xl text-muted">{getDayAsString()}</Text>
-          <Text className="text-9xl text-foreground">{getDate(new Date())}</Text>
+          <Text className="text-2xl text-muted">{getDayAsString()}</Text>
+          <Text className="text-9xl text-foreground">
+            {getDate(new Date())}
+          </Text>
         </View>
         {events.length > 0 && events !== undefined && (
           <View className="gap-2">
             {events.map((event) => (
-              <View key={event.id} className="flex flex-row items-center justify-center gap-4">
+              <View
+                key={event.id}
+                className="flex flex-row items-center justify-center gap-4"
+              >
                 <View
                   style={{
                     backgroundColor:
-                      calendars.find((c) => c.id === event.calendarId)
-                        ?.color || "red",
+                      calendars.find((c) => c.id === event.calendarId)?.color ||
+                      "red",
                     width: 10,
                     height: 10,
                     borderRadius: 100,
                   }}
                 ></View>
-                <Text style={{ fontSize: 16, fontWeight: "500" }} className="text-foreground">
+                <Text
+                  style={{ fontSize: 16, fontWeight: "500" }}
+                  className="text-foreground"
+                >
                   {event.title}
                 </Text>
                 <Text className="text-muted">
