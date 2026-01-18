@@ -1,16 +1,16 @@
 import { useCalendar } from "@/stores/use-calendar";
 import {
-    add,
-    format,
-    getDate,
-    getDay,
-    startOfToday
+  add,
+  format,
+  getDate,
+  getDay,
+  startOfToday
 } from "date-fns";
 import * as Calendar from "expo-calendar";
 import { useEffect, useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import {
-    useSafeAreaInsets
+  useSafeAreaInsets
 } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -79,50 +79,48 @@ export default function HomeScreen() {
 
   return (
     <View
-      className="flex-1 flex-col items-center justify-around bg-[#000000] dark:bg-[#18181B]"
+      className="flex-1 flex-col items-center justify-around bg-[#FCFCFC] dark:bg-[#18181B]"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
       }}
     >
-      <View style={styles.header}>
-        <Text className="text-lg dark:text-muted">Welcome User</Text>
+      <View className="flex items-center">
+        <Text className="text-lg text-muted">Welcome User</Text>
         <Text className="text-xl font-normal dark:text-foreground">
           You have <Text className="text-xl font-semibold dark:text-foreground">{events?.length}</Text>{" "}
           Events today
         </Text>
       </View>
-      <View className="flex-1 items-center justify-center">
-        <View className="items-center p-16">
-          <Text style={styles.date} className="text-foreground -m-2">{getDate(new Date())}</Text>
-          <Text style={styles.date} className="text-foreground">{getDayAsString()}</Text>
+      <View className="flex-1 items-center justify-center gap-8">
+        <View className="items-center gap-2">
+                    <Text className="text-2xl text-muted">{getDayAsString()}</Text>
+          <Text className="text-9xl text-foreground">{getDate(new Date())}</Text>
         </View>
-        <View style={styles.eventsContainer}>
-          {events.length > 0 && events !== undefined && (
-            <View style={styles.events}>
-              {events.map((event) => (
-                <View key={event.id} style={styles.event}>
-                  <View
-                    style={{
-                      backgroundColor:
-                        calendars.find((c) => c.id === event.calendarId)
-                          ?.color || "red",
-                      width: 10,
-                      height: 10,
-                      borderRadius: 100,
-                    }}
-                  ></View>
-                  <Text style={{ fontSize: 16, fontWeight: "500" }} className="text-foreground">
-                    {event.title}
-                  </Text>
-                  <Text className="text-muted">
-                    {format(event.startDate, "h:mm b")}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
+        {events.length > 0 && events !== undefined && (
+          <View className="gap-2">
+            {events.map((event) => (
+              <View key={event.id} className="flex flex-row items-center justify-center gap-4">
+                <View
+                  style={{
+                    backgroundColor:
+                      calendars.find((c) => c.id === event.calendarId)
+                        ?.color || "red",
+                    width: 10,
+                    height: 10,
+                    borderRadius: 100,
+                  }}
+                ></View>
+                <Text style={{ fontSize: 16, fontWeight: "500" }} className="text-foreground">
+                  {event.title}
+                </Text>
+                <Text className="text-muted">
+                  {format(event.startDate, "h:mm a")}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -163,28 +161,3 @@ async function listCalendars() {
 async function createCalendarEvent() {
   Calendar.createEventInCalendarAsync();
 }
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "column",
-    alignItems: "center",
-    alignContent: "center",
-  },
-  date: {
-    fontSize: 60,
-    fontWeight: "800",
-  },
-  eventsContainer: {
-    alignItems: "center",
-    padding: 16,
-  },
-  events: {
-    alignItems: "center",
-  },
-  event: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 8,
-    paddingBottom: 4,
-  },
-});
