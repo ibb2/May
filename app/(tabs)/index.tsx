@@ -8,7 +8,7 @@ import {
 } from "date-fns";
 import * as Calendar from "expo-calendar";
 import { useEffect, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import {
   useSafeAreaInsets
 } from "react-native-safe-area-context";
@@ -23,19 +23,6 @@ export default function HomeScreen() {
 
   const startDate = startOfToday();
   const endDate = add(startDate, { days: 1 });
-
-  async function listEvents() {
-    const startDate = startOfToday();
-    const endDate = add(startDate, { days: 1 });
-    const events = await Calendar.getEventsAsync(
-      ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-      startDate,
-      endDate,
-    );
-    console.log("Events");
-    console.log(events);
-    setEvents(events);
-  }
 
   function getDayAsString() {
     const d = getDay(new Date());
@@ -52,8 +39,6 @@ export default function HomeScreen() {
   }
 
   const insets = useSafeAreaInsets();
-
-
 
   useEffect(() => {
     (async () => {
@@ -124,40 +109,4 @@ export default function HomeScreen() {
       </View>
     </View>
   );
-}
-
-async function getDefaultCalendarSource() {
-  const defaultCalendar = await Calendar.getDefaultCalendarAsync();
-  return defaultCalendar.source;
-}
-
-async function createCalendar() {
-  const defaultCalendarSource =
-    Platform.OS === "ios"
-      ? await getDefaultCalendarSource()
-      : { isLocalAccount: true, name: "Expo Calendar" };
-  const newCalendarID = await Calendar.createCalendarAsync({
-    title: "Expo Calendar",
-    color: "blue",
-    entityType: Calendar.EntityTypes.EVENT,
-    sourceId: defaultCalendarSource.id,
-    source: defaultCalendarSource,
-    name: "internalCalendarName",
-    ownerAccount: "personal",
-    accessLevel: Calendar.CalendarAccessLevel.OWNER,
-  });
-  console.log(`Your new calendar ID is: ${newCalendarID}`);
-}
-
-async function listCalendars() {
-  const calendars = await Calendar.getCalendarsAsync(
-    Calendar.EntityTypes.EVENT,
-  );
-
-  console.log("Here are all your calendars:");
-  console.log({ calendars });
-}
-
-async function createCalendarEvent() {
-  Calendar.createEventInCalendarAsync();
 }
