@@ -50,7 +50,7 @@ export default function RootLayout() {
                 </View>
               ),
               headerLeft: () => (
-                <HeaderButton onPress={() => router.push("/settings")}>
+                <HeaderButton onPress={() => router.push("/(modal)")}>
                   <SymbolView
                     name="gear"
                     type="monochrome"
@@ -75,7 +75,7 @@ export default function RootLayout() {
           />
           <Stack.Screen name="setup" options={{ headerShown: false }} />
           <Stack.Screen
-            name="settings"
+            name="(modal)"
             options={{ presentation: "modal", headerShown: false }}
           />
           <Stack.Screen
