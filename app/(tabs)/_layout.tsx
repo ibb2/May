@@ -15,17 +15,17 @@ export default function TabLayout() {
 
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="index" options={{ title: "Home" }}>
         <Label>Today</Label>
         <Icon
           sf="distribute.vertical.fill"
           drawable="custom_android_drawable"
         />
       </NativeTabs.Trigger>
-      {/*<NativeTabs.Trigger name="explore">
+      <NativeTabs.Trigger name="explore">
         <Label>3 Days</Label>
         <Icon sf="rectangle.split.3x1" drawable="custom_plane_drawable" />
-      </NativeTabs.Trigger>*/}
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search" role="search">
         <Label>Search</Label>
         <Icon sf="plus" drawable="custom_plane_drawable" />
