@@ -51,10 +51,6 @@ export default function CalendarSettings() {
       // 0 Step is selecting calendars
       if (selectedCalendars.length === 0) return;
     }
-    setAllCalendars(selectedCalendars);
-    completeSetup();
-    router.replace("/(tabs)");
-    setStep(step + 1);
   }
 
   function removeCalendar(calendar: Calendar.Calendar) {
@@ -76,31 +72,12 @@ export default function CalendarSettings() {
     );
 
     setSelectedCalendars(calendarArrayWithoutSelectedCalendar);
+    setAllCalendars(selectedCalendars);
   }
 
   function addCalendar(calendar: Calendar.Calendar) {
-    if (
-      !selectedCalendars.includes(calendar) &&
-      !(selectedCalendars.length > 0)
-    )
-      return;
-
-    if (selectedCalendars.includes(calendar) && selectedCalendars.length > 0) {
-      setSelectedCalendars([]);
-
-      const selectedCalendarPos = selectedCalendars.findIndex((c) => {
-        return c.id === calendar.id;
-      });
-
-      const calendarArrayWithoutSelectedCalendar = selectedCalendars.toSpliced(
-        selectedCalendarPos,
-        1,
-      );
-
-      setSelectedCalendars(calendarArrayWithoutSelectedCalendar);
-    } else {
-      setSelectedCalendars([...selectedCalendars, calendar]);
-    }
+    setSelectedCalendars([...selectedCalendars, calendar]);
+    setAllCalendars([...selectedCalendars, calendar]);
   }
 
   useEffect(() => {
