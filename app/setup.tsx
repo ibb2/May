@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import * as Calendar from "expo-calendar";
-import { Card, Checkbox, cn } from "heroui-native";
+import { Button, Card, Checkbox, cn } from "heroui-native";
+import CalendarList from "@/components/setup/calendar-list";
+import { useRouter } from "expo-router";
+import { useCalendar } from "@/stores/use-calendar";
 
 export default function Setup() {
+  const router = useRouter();
+
+  // Store
+  const setAllCalendars = useCalendar((state) => state.setAllCalendars);
+  const completeSetup = useCalendar((state) => state.completeSetup);
+
+  const [step, setStep] = useState(0);
   const [calendars, setCalendars] = useState<Calendar.Calendar[]>([]);
   const [selectedCalendars, setSelectedCalendars] = useState<
     Calendar.Calendar[]
@@ -28,6 +38,18 @@ export default function Setup() {
     }
   }
 
+  function progressCalendarFlow() {
+    // Scafolding to add more steps to the setup flow.
+    if (step === 0) {
+      // 0 Step is selecting calendars
+      if (selectedCalendars.length === 0) return;
+    }
+    setAllCalendars(selectedCalendars);
+    completeSetup();
+    router.replace("/(tabs)");
+    setStep(step + 1);
+  }
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -46,23 +68,14 @@ export default function Setup() {
 
   return (
     <View className="flex-1 items-center justify-center gap-8">
-      <Text className="text-2xl font-bold">Select your calendars</Text>
-      <View className="items-center w-full gap-2">
-        {calendars.map((calendar, index) => (
-          <Text
-            key={calendar.id + index}
-            className={cn(
-              "text-lg",
-              selectedCalendars.includes(calendar)
-                ? "underline"
-                : "no-underline",
-            )}
-            onPress={() => selectCalendar(calendar)}
-          >
-            {calendar.title}
-          </Text>
-        ))}
-      </View>
+      {step === 0 && (
+        <CalendarList
+          selectedCalendars={selectedCalendars}
+          selectCalendar={selectCalendar}
+        />
+      )}
+      {step === 1 && <Text>Step 2</Text>}
+      <Button onPress={progressCalendarFlow}>Done</Button>
     </View>
   );
 }
