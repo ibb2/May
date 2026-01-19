@@ -13,7 +13,7 @@ export default function SettingsHomeScreen() {
         <Text className="text-sm text-muted pl-4">General</Text>
         <Surface className="flex gap-2" variant="secondary">
           <Pressable onPress={() => router.push("/(modal)/settings-calendar")}>
-            <View className="flex flex-row gap-4">
+            <View className="flex flex-row items-center gap-4">
               <SymbolView
                 name="calendar"
                 type="monochrome"
