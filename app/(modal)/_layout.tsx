@@ -13,7 +13,7 @@ export default function ModalLayout() {
   return (
     <Stack screenOptions={{ headerShadowVisible: false }}>
       <Stack.Screen
-        name="index"
+        name="settings-home"
         options={{
           title: "Settings",
           headerRight: () => (
@@ -29,20 +29,22 @@ export default function ModalLayout() {
         }}
       />
       <Stack.Screen
-        name="settings/calendar"
+        name="settings-calendar"
         options={{
           title: "Calendar",
           headerBackButtonDisplayMode: "minimal",
+          headerRight: () => (
+            <HeaderButton onPress={() => router.replace("/(tabs)")}>
+              <SymbolView
+                name="checkmark"
+                type="hierarchical"
+                className="m-0"
+                size={24}
+              />
+            </HeaderButton>
+          ),
         }}
       />
-      {/*<Stack.Screen
-        name="settings"
-        options={{ presentation: "modal", headerShown: false }}
-      />
-      <Stack.Screen
-        name="modal"
-        options={{ presentation: "modal", title: "Modal" }}
-      />*/}
     </Stack>
   );
 }

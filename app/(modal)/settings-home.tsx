@@ -4,7 +4,7 @@ import { Divider, Surface } from "heroui-native";
 import { View, Text } from "react-native";
 import { Pressable } from "react-native-gesture-handler";
 
-export default function SettingsScreen() {
+export default function SettingsHomeScreen() {
   const router = useRouter();
 
   return (
@@ -14,7 +14,7 @@ export default function SettingsScreen() {
           <Text className="text-sm text-muted">General</Text>
           <Surface className="flex gap-2" variant="secondary">
             <Pressable
-              onPress={() => router.push("/(modal)/settings/calendar")}
+              onPress={() => router.push("/(modal)/settings-calendar")}
             >
               <View>
                 <Text>Calendars</Text>

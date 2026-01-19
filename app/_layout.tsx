@@ -50,7 +50,9 @@ export default function RootLayout() {
                 </View>
               ),
               headerLeft: () => (
-                <HeaderButton onPress={() => router.push("/(modal)")}>
+                <HeaderButton
+                  onPress={() => router.push("/(modal)/settings-home")}
+                >
                   <SymbolView
                     name="gear"
                     type="monochrome"
