@@ -71,61 +71,42 @@ export default function HomeScreen() {
   if (!setup) return <Redirect href={"/setup"} />;
 
   return (
-    <View
-      className="flex-1 flex-col items-center justify-around bg-[#FCFCFC] dark:bg-[#18181B]"
-      style={{
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}
-    >
-      <View className="flex items-center">
-        <Text className="text-lg text-muted">Welcome User</Text>
-        <Text className="text-xl font-normal dark:text-foreground">
-          You have{" "}
-          <Text className="text-xl font-semibold dark:text-foreground">
-            {events?.length}
-          </Text>{" "}
-          Events today
-        </Text>
+    <View className="flex-1 flex-col items-center justify-center gap-16 bg-[#FCFCFC] dark:bg-[#18181B]">
+      <View className="items-center gap-2">
+        <Text className="text-2xl text-muted">{getDayAsString()}</Text>
+        <Text className="text-9xl text-foreground">{getDate(new Date())}</Text>
       </View>
-      <View className="flex-1 items-center justify-center gap-8">
-        <View className="items-center gap-2">
-          <Text className="text-2xl text-muted">{getDayAsString()}</Text>
-          <Text className="text-9xl text-foreground">
-            {getDate(new Date())}
-          </Text>
-        </View>
-        {events.length > 0 && events !== undefined && (
-          <View className="gap-2">
-            {events.map((event) => (
+      {events.length > 0 && events !== undefined && (
+        <View className="gap-2">
+          {events.map((event) => (
+            <View
+              key={event.id}
+              className="flex flex-row items-center justify-center gap-4"
+            >
               <View
-                key={event.id}
-                className="flex flex-row items-center justify-center gap-4"
+                style={{
+                  backgroundColor:
+                    calendars.find((c) => c.id === event.calendarId)?.color ||
+                    "red",
+                  width: 10,
+                  height: 10,
+                  borderRadius: 100,
+                }}
+              ></View>
+              <Text
+                style={{ fontSize: 16, fontWeight: "500" }}
+                className="text-foreground"
               >
-                <View
-                  style={{
-                    backgroundColor:
-                      calendars.find((c) => c.id === event.calendarId)?.color ||
-                      "red",
-                    width: 10,
-                    height: 10,
-                    borderRadius: 100,
-                  }}
-                ></View>
-                <Text
-                  style={{ fontSize: 16, fontWeight: "500" }}
-                  className="text-foreground"
-                >
-                  {event.title}
-                </Text>
-                <Text className="text-muted">
-                  {format(event.startDate, "h:mm a")}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
+                {event.title}
+              </Text>
+              <Text className="text-muted">
+                {format(event.startDate, "h:mm a")}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+      <View></View>
     </View>
   );
 }

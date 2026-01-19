@@ -6,6 +6,7 @@ import {
 import { Redirect, Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import * as Calendar from "expo-calendar";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { HeroUINativeProvider } from "heroui-native";
@@ -16,6 +17,7 @@ import { Button, Text, View } from "react-native";
 import { Icon } from "expo-router/build/native-tabs";
 import { SymbolView } from "expo-symbols";
 import { HeaderButton } from "@react-navigation/elements";
+import { add, startOfToday } from "date-fns";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -27,6 +29,42 @@ export default function RootLayout() {
 
   // States
   const [count, setCount] = useState(0);
+  const [events, setEvents] = useState<Calendar.Event[]>([]);
+
+  // Store
+  const eventUpdated = useCalendar((state) => state.eventUpdated);
+  const updateEvents = useCalendar((state) => state.updateEvents);
+  const setup = useCalendar((state) => state.setup);
+  const calendars = useCalendar((state) => state.calendars);
+
+  const startDate = startOfToday();
+  const endDate = add(startDate, { days: 1 });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === "granted") {
+        const eventsPerCalendar = await Promise.all(
+          calendars.map((calendar: Calendar.Calendar) =>
+            Calendar.getEventsAsync([calendar.id], startDate, endDate),
+          ),
+        );
+
+        if (cancelled) return;
+
+        setEvents(eventsPerCalendar.flat());
+        updateEvents(false);
+
+        console.log("Calendars and events fetched successfully");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventUpdated, updateEvents, startDate, endDate]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -45,8 +83,15 @@ export default function RootLayout() {
                 fontWeight: "bold",
               },
               headerTitle: (props) => (
-                <View>
-                  <Text> Hello</Text>
+                <View className="flex items-center">
+                  <Text className=" text-muted">Welcome User</Text>
+                  <Text className="text-lg font-normal dark:text-foreground">
+                    You have{" "}
+                    <Text className="text-lg font-semibold dark:text-foreground">
+                      {events?.length}
+                    </Text>{" "}
+                    Events today
+                  </Text>
                 </View>
               ),
               headerLeft: () => (
