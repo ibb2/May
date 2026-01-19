@@ -8,12 +8,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Calendar.Event[]>([]);
-  const [calendars, setCalendars] = useState<Calendar.Calendar[]>([]);
 
   // Store
   const eventUpdated = useCalendar((state) => state.eventUpdated);
   const updateEvents = useCalendar((state) => state.updateEvents);
   const setup = useCalendar((state) => state.setup);
+  const calendars = useCalendar((state) => state.calendars);
 
   const startDate = startOfToday();
   const endDate = add(startDate, { days: 1 });
@@ -43,25 +43,29 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === "granted") {
-        const [calendars, events] = await Promise.all([
-          Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT),
-          Calendar.getEventsAsync(
-            ["AB499137-F401-4F65-B90A-3E6A02C8A16C"],
-            startDate,
-            endDate,
+        const eventsPerCalendar = await Promise.all(
+          calendars.map((calendar: Calendar.Calendar) =>
+            Calendar.getEventsAsync([calendar.id], startDate, endDate),
           ),
-        ]);
+        );
 
-        setCalendars(calendars);
-        setEvents(events);
+        if (cancelled) return;
+
+        setEvents(eventsPerCalendar.flat());
         updateEvents(false);
 
         console.log("Calendars and events fetched successfully");
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [eventUpdated, updateEvents, startDate, endDate]);
 
   if (!setup) return <Redirect href={"/setup"} />;
