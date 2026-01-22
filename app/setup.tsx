@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
-import { View, Text } from "react-native";
-import * as Calendar from "expo-calendar";
-import { Button, Card, Checkbox, cn } from "heroui-native";
 import CalendarList from "@/components/setup/calendar-list";
-import { useRouter } from "expo-router";
 import { useCalendar } from "@/stores/use-calendar";
+import * as Calendar from "expo-calendar";
+import { useRouter } from "expo-router";
+import { Button, Spinner } from "heroui-native";
+import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
 
 export default function Setup() {
   const router = useRouter();
 
   // Store
+  const _hasHydrated = useCalendar((state) => state._hasHydrated);
   const allCalendars = useCalendar((state) => state.calendars);
   const setAllCalendars = useCalendar((state) => state.setAllCalendars);
   const completeSetup = useCalendar((state) => state.completeSetup);
@@ -21,20 +22,15 @@ export default function Setup() {
   >([]);
 
   function selectCalendar(calendar: Calendar.Calendar) {
-    if (selectedCalendars.includes(calendar) && selectedCalendars.length > 0) {
-      setSelectedCalendars([]);
+    const isSelected = selectedCalendars.some((c) => c.id === calendar.id);
 
-      const selectedCalendarPos = selectedCalendars.findIndex((c) => {
-        return c.id === calendar.id;
-      });
-
-      const calendarArrayWithoutSelectedCalendar = selectedCalendars.toSpliced(
-        selectedCalendarPos,
-        1,
+    if (isSelected) {
+      // Deselect
+      setSelectedCalendars(
+        selectedCalendars.filter((c) => c.id !== calendar.id)
       );
-
-      setSelectedCalendars(calendarArrayWithoutSelectedCalendar);
     } else {
+      // Select
       setSelectedCalendars([...selectedCalendars, calendar]);
     }
   }
@@ -51,13 +47,18 @@ export default function Setup() {
     setStep(step + 1);
   }
 
+  // Handle hydration complete - check if calendars exist
   useEffect(() => {
+    if (!_hasHydrated) return;
+
+    // If calendars already selected, redirect to home
     if (allCalendars.length > 0) {
-      console.log("Calendars persisted");
-      console.log(allCalendars.length);
+      console.log("Calendars persisted, redirecting to home");
       router.replace("/(tabs)");
+      return;
     }
 
+    // Fetch available calendars for selection
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === "granted") {
@@ -65,13 +66,19 @@ export default function Setup() {
           Calendar.EntityTypes.EVENT,
         );
         setCalendars(calendars);
-
-        console.log("Calendars fetched successfully");
-        console.log(calendars.length);
-        // console.log(calendars);
+        console.log(`Calendars fetched: ${calendars.length}`);
       }
     })();
-  }, [allCalendars.length, router]);
+  }, [_hasHydrated, allCalendars, router]);
+
+  // Show spinner while hydrating or if calendars are persisted (redirecting)
+  if (!_hasHydrated || allCalendars.length > 0) {
+    return (
+      <Spinner>
+        <Spinner.Indicator />
+      </Spinner>
+    );
+  }
 
   return (
     <View className="flex-1 items-center justify-center gap-8">

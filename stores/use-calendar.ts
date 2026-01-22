@@ -6,6 +6,7 @@ import Storage from "expo-sqlite/kv-store";
 export const useCalendar = create()(
   persist(
     (set) => ({
+      _hasHydrated: false,
       setup: false,
       calendars: [],
       eventUpdated: false,
@@ -33,6 +34,7 @@ export const useCalendar = create()(
           if (error) {
             console.log("an error happened during hydration", error);
           } else {
+            state._hasHydrated = true;
             console.log("Length of calendars, ", state.calendars.length);
             console.log("hydration finished");
           }
