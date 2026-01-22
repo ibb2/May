@@ -10,6 +10,7 @@ export default function Setup() {
   const router = useRouter();
 
   // Store
+  const allCalendars = useCalendar((state) => state.calendars);
   const setAllCalendars = useCalendar((state) => state.setAllCalendars);
   const completeSetup = useCalendar((state) => state.completeSetup);
 
@@ -51,6 +52,12 @@ export default function Setup() {
   }
 
   useEffect(() => {
+    if (allCalendars.length > 0) {
+      console.log("Calendars persisted");
+      console.log(allCalendars.length);
+      router.replace("/(tabs)");
+    }
+
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === "granted") {
@@ -64,7 +71,7 @@ export default function Setup() {
         // console.log(calendars);
       }
     })();
-  }, []);
+  }, [allCalendars.length, router]);
 
   return (
     <View className="flex-1 items-center justify-center gap-8">
