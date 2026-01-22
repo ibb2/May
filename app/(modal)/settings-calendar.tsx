@@ -27,57 +27,25 @@ export default function CalendarSettings() {
   >([]);
 
   function selectCalendar(calendar: Calendar.Calendar) {
-    if (selectedCalendars.includes(calendar) && selectedCalendars.length > 0) {
-      setSelectedCalendars([]);
+    const isSelected = selectedCalendars.some((c) => c.id === calendar.id);
+    let _selectedCalendars = [];
 
-      const selectedCalendarPos = activeCalendars.findIndex((c) => {
-        return c.id === calendar.id;
-      });
-
-      const calendarArrayWithoutSelectedCalendar = selectedCalendars.toSpliced(
-        selectedCalendarPos,
-        1,
+    if (isSelected) {
+      // Deselect
+      setSelectedCalendars(
+        selectedCalendars.filter((c) => c.id !== calendar.id),
       );
-
-      setSelectedCalendars(calendarArrayWithoutSelectedCalendar);
+      _selectedCalendars = selectedCalendars.filter(
+        (c) => c.id !== calendar.id,
+      );
     } else {
+      // Select
       setSelectedCalendars([...selectedCalendars, calendar]);
+      _selectedCalendars = [...selectedCalendars, calendar];
     }
-  }
 
-  function progressCalendarFlow() {
-    // Scafolding to add more steps to the setup flow.
-    if (step === 0) {
-      // 0 Step is selecting calendars
-      if (selectedCalendars.length === 0) return;
-    }
-  }
-
-  function removeCalendar(calendar: Calendar.Calendar) {
-    if (
-      !selectedCalendars.includes(calendar) &&
-      !(selectedCalendars.length > 0)
-    )
-      return;
-
-    setSelectedCalendars([]);
-
-    const selectedCalendarPos = selectedCalendars.findIndex((c) => {
-      return c.id === calendar.id;
-    });
-
-    const calendarArrayWithoutSelectedCalendar = selectedCalendars.toSpliced(
-      selectedCalendarPos,
-      1,
-    );
-
-    setSelectedCalendars(calendarArrayWithoutSelectedCalendar);
-    setAllCalendars(selectedCalendars);
-  }
-
-  function addCalendar(calendar: Calendar.Calendar) {
-    setSelectedCalendars([...selectedCalendars, calendar]);
-    setAllCalendars([...selectedCalendars, calendar]);
+    console.log("All Selected Calendars ", _selectedCalendars);
+    setAllCalendars(_selectedCalendars);
   }
 
   useEffect(() => {
@@ -91,7 +59,7 @@ export default function CalendarSettings() {
         setSelectedCalendars(activeCalendars);
       }
     })();
-  }, []);
+  }, [activeCalendars]);
 
   return (
     <Surface className="flex-1 p-4 rounded-none">
@@ -103,7 +71,7 @@ export default function CalendarSettings() {
               <Pressable
                 key={selectedCalendar.id}
                 onPress={() => {
-                  removeCalendar(selectedCalendar);
+                  selectCalendar(selectedCalendar);
                 }}
               >
                 <View className="flex flex-row justify-between">
@@ -129,7 +97,7 @@ export default function CalendarSettings() {
                 <Pressable
                   key={selectedCalendar.id}
                   onPress={() => {
-                    addCalendar(selectedCalendar);
+                    selectCalendar(selectedCalendar);
                   }}
                 >
                   <View className="flex flex-row justify-between">
