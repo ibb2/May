@@ -27,7 +27,7 @@ export default function Setup() {
     if (isSelected) {
       // Deselect
       setSelectedCalendars(
-        selectedCalendars.filter((c) => c.id !== calendar.id)
+        selectedCalendars.filter((c) => c.id !== calendar.id),
       );
     } else {
       // Select
@@ -53,7 +53,6 @@ export default function Setup() {
 
     // If calendars already selected, redirect to home
     if (allCalendars.length > 0) {
-      console.log("Calendars persisted, redirecting to home");
       router.replace("/(tabs)");
       return;
     }
@@ -66,7 +65,6 @@ export default function Setup() {
           Calendar.EntityTypes.EVENT,
         );
         setCalendars(calendars);
-        console.log(`Calendars fetched: ${calendars.length}`);
       }
     })();
   }, [_hasHydrated, allCalendars, router]);

@@ -44,7 +44,6 @@ export default function CalendarSettings() {
       _selectedCalendars = [...selectedCalendars, calendar];
     }
 
-    console.log("All Selected Calendars ", _selectedCalendars);
     setAllCalendars(_selectedCalendars);
   }
 

@@ -35,8 +35,6 @@ export const useCalendar = create()(
             console.log("an error happened during hydration", error);
           } else {
             state._hasHydrated = true;
-            console.log("Length of calendars, ", state.calendars.length);
-            console.log("hydration finished");
           }
         };
       },
