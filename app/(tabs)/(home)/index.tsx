@@ -1,0 +1,159 @@
+import { useCalendar } from "@/stores/use-calendar";
+import { HeaderButton } from "@react-navigation/elements";
+import { add, format, getDate, getDay, set, startOfToday } from "date-fns";
+import * as Calendar from "expo-calendar";
+import { Redirect, Stack, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import React, { useEffect, useState } from "react";
+import { Text, useColorScheme, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export default function HomeScreen() {
+  const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  const [events, setEvents] = useState<Calendar.Event[]>([]);
+
+  // Store
+  const eventUpdated = useCalendar((state) => state.eventUpdated);
+  const updateEvents = useCalendar((state) => state.updateEvents);
+  const setup = useCalendar((state) => state.setup);
+  const calendars = useCalendar((state) => state.calendars);
+
+  const startDate = startOfToday();
+  const endDate = add(startDate, { days: 1 });
+
+  function getDayAsString() {
+    const d = getDay(new Date());
+    switch (d) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 0:
+        return "Sunday"; // getDay returns 0 for Sunday
+      default:
+        return "Monday";
+    }
+  }
+
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === "granted") {
+        const eventsPerCalendar = await Promise.all(
+          calendars.map((calendar: Calendar.Calendar) =>
+            Calendar.getEventsAsync([calendar.id], startDate, endDate),
+          ),
+        );
+
+        if (cancelled) return;
+
+        setEvents(eventsPerCalendar.flat());
+        updateEvents(false);
+
+        console.log("Calendars and events fetched successfully");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventUpdated, updateEvents, startDate, endDate]);
+
+  if (!setup) return <Redirect href={"/setup"} />;
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: "My home",
+          headerShadowVisible: false,
+          headerStyle: {
+            backgroundColor: colorScheme === "dark" ? "#18181B" : "#FCFCFC",
+          },
+          headerTitle: () => (
+            <View className="items-center">
+              <Text className="text-muted">Welcome User</Text>
+              <Text className="text-lg">
+                You have <Text className="font-semibold">{events.length}</Text>{" "}
+                events today
+              </Text>
+            </View>
+          ),
+          headerLeft: () => (
+            <HeaderButton onPress={() => router.push("/(modal)/settings-home")}>
+              <SymbolView
+                name="gear"
+                type="monochrome"
+                tintColor="#000"
+                size={24}
+              />
+            </HeaderButton>
+          ),
+          headerRight: () => (
+            <HeaderButton>
+              <SymbolView
+                name="plus"
+                type="monochrome"
+                tintColor="#000"
+                size={24}
+              />
+            </HeaderButton>
+          ),
+        }}
+      />
+      <View className="flex-1 flex-col items-center justify-center gap-16 bg-[#FCFCFC] dark:bg-[#18181B]">
+        <View className="items-center gap-2">
+          <Text className="text-2xl text-muted">{getDayAsString()}</Text>
+          <Text className="text-9xl text-foreground">
+            {getDate(new Date())}
+          </Text>
+        </View>
+        {events.length > 0 && events !== undefined && (
+          <View className="gap-2">
+            {events.map((event) => (
+              <View
+                key={event.id}
+                className="flex flex-row items-center justify-center gap-4"
+              >
+                <View
+                  style={{
+                    backgroundColor:
+                      calendars.find((c) => c.id === event.calendarId)?.color ||
+                      "red",
+                    width: 10,
+                    height: 10,
+                    borderRadius: 100,
+                  }}
+                ></View>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "500" }}
+                  className="text-foreground"
+                >
+                  {event.title}
+                </Text>
+                <Text className="text-muted">
+                  {format(event.startDate, "h:mm a")}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+        <View></View>
+      </View>
+    </>
+  );
+}

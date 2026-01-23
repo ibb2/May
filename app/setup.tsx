@@ -43,7 +43,7 @@ export default function Setup() {
     }
     setAllCalendars(selectedCalendars);
     completeSetup();
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/(home)");
     setStep(step + 1);
   }
 
@@ -53,7 +53,7 @@ export default function Setup() {
 
     // If calendars already selected, redirect to home
     if (allCalendars.length > 0) {
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/(home)");
       return;
     }
 

@@ -24,26 +24,10 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <HeroUINativeProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="setup" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(modal)"
-            options={{ presentation: "modal", headerShown: false }}
-          />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: "modal", title: "Modal" }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </HeroUINativeProvider>
-    </GestureHandlerRootView>
+    <>
+      <Stack></Stack>
+      <StatusBar style="auto" />
+    </>
   );
 }
