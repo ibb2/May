@@ -70,7 +70,7 @@ export default function Setup() {
   }, [_hasHydrated, allCalendars, router]);
 
   // Show spinner while hydrating or if calendars are persisted (redirecting)
-  if (!_hasHydrated || allCalendars.length > 0) {
+  if (!_hasHydrated && allCalendars.length > 0) {
     return (
       <Spinner>
         <Spinner.Indicator />
