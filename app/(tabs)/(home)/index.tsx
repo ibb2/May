@@ -87,7 +87,7 @@ export default function HomeScreen() {
           headerTitle: () => (
             <View className="items-center">
               <Text className="text-muted">Welcome User</Text>
-              <Text className="text-lg">
+              <Text className="text-lg dark:text-white">
                 You have <Text className="font-semibold">{events.length}</Text>{" "}
                 events today
               </Text>
@@ -98,7 +98,7 @@ export default function HomeScreen() {
               <SymbolView
                 name="gear"
                 type="monochrome"
-                tintColor="#000"
+                tintColor={colorScheme === "dark" ? "#fff" : "#000"}
                 size={24}
               />
             </HeaderButton>
@@ -108,7 +108,7 @@ export default function HomeScreen() {
               <SymbolView
                 name="plus"
                 type="monochrome"
-                tintColor="#000"
+                tintColor={colorScheme === "dark" ? "#fff" : "#000"}
                 size={24}
               />
             </HeaderButton>
