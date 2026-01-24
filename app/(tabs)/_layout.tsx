@@ -9,6 +9,14 @@ export default function TabLayout() {
 
   return (
     <NativeTabs>
+      <NativeTabs.Trigger name="(schedule)">
+        <NativeTabs.Trigger.Label>Schedule</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf="rectangle.grid.1x2"
+          drawable="custom_plane_drawable"
+          md="home"
+        />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="(home)">
         <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
