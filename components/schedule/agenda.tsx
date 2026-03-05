@@ -79,10 +79,11 @@ export default function AgendaComponent({
   const [rangeEnd, setRangeEnd] = useState(
     addDays(startOfDay(selectedDate), INITIAL_FUTURE_DAYS),
   );
+
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
   const isPaginatingRef = useRef(false);
-  const todayYOffsetRef = useRef<number>(0);
+  const todayYOffsetRef = useRef(0);
   const contentHeightRef = useRef(0);
   const scrollYRef = useRef(0);
   const pendingPrependHeightRef = useRef<number | null>(null);
@@ -110,6 +111,13 @@ export default function AgendaComponent({
         ),
     }));
   }, [days, events]);
+
+  const visibleGroups = useMemo(
+    () => groups.filter((group) => group.events.length > 0),
+    [groups],
+  );
+
+  const noCalendarEvents = events.length === 0;
 
   function paginateForward() {
     if (isPaginatingRef.current) return;
@@ -157,16 +165,11 @@ export default function AgendaComponent({
     <View className="w-full flex-1 bg-[#FCFCFC] dark:bg-[#18181B]">
       <View className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
         <View className="flex-row items-center justify-between">
-          <View className="rounded-full bg-zinc-100 px-4 py-1.5 dark:bg-zinc-800">
-            <Text className="text-base font-semibold text-zinc-800 dark:text-zinc-100">
-              {format(displayDate, "MMMM yyyy")}
-            </Text>
-          </View>
-          <Pressable
-            className="rounded-full bg-blue-600 px-4 py-1.5"
-            onPress={jumpToToday}
-          >
-            <Text className="font-semibold text-white">Today</Text>
+          <Text className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+            {format(displayDate, "MMMM yyyy")}
+          </Text>
+          <Pressable onPress={jumpToToday}>
+            <Text className="text-sm font-medium text-blue-600">Today</Text>
           </Pressable>
         </View>
       </View>
@@ -174,7 +177,7 @@ export default function AgendaComponent({
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
-        contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 112 }}
+        contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 96 }}
         onContentSizeChange={(_, contentHeight) => {
           const previousHeight = contentHeightRef.current;
           contentHeightRef.current = contentHeight;
@@ -198,7 +201,7 @@ export default function AgendaComponent({
             });
           }
 
-          if (pendingJumpToTodayRef.current && todayYOffsetRef.current > 0) {
+          if (pendingJumpToTodayRef.current) {
             pendingJumpToTodayRef.current = false;
             scrollViewRef.current?.scrollTo({
               y: Math.max(todayYOffsetRef.current - 120, 0),
@@ -216,28 +219,22 @@ export default function AgendaComponent({
           }, 0);
         }}
         onScroll={({ nativeEvent }) => {
-          const {
-            contentOffset,
-            layoutMeasurement,
-            contentSize,
-          } = nativeEvent;
+          const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
           scrollYRef.current = contentOffset.y;
 
           if (contentOffset.y < 80) paginateBackward();
 
           const distanceFromBottom =
-            contentSize.height -
-            (contentOffset.y + layoutMeasurement.height);
-
+            contentSize.height - (contentOffset.y + layoutMeasurement.height);
           if (distanceFromBottom < 180) paginateForward();
 
           const targetY = contentOffset.y + 120;
-          let visibleDate = groups[0]?.date;
-          for (let i = 0; i < groups.length; i += 1) {
-            const key = groups[i].date.toISOString();
+          let visibleDate = visibleGroups[0]?.date;
+          for (let i = 0; i < visibleGroups.length; i += 1) {
+            const key = visibleGroups[i].date.toISOString();
             const offsetY = dayOffsetsRef.current[key];
             if (offsetY === undefined) continue;
-            if (offsetY <= targetY) visibleDate = groups[i].date;
+            if (offsetY <= targetY) visibleDate = visibleGroups[i].date;
             else break;
           }
 
@@ -252,87 +249,95 @@ export default function AgendaComponent({
         }}
         scrollEventThrottle={16}
       >
-        {groups.map((group) => {
-          const isCurrentDay = isToday(group.date);
+        {noCalendarEvents ? (
+          <View className="mt-24 items-center px-6">
+            <Text className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              No events on your calendar
+            </Text>
+            <Text className="mt-2 text-center text-zinc-500 dark:text-zinc-400">
+              Use Add in the header to create your first event.
+            </Text>
+          </View>
+        ) : (
+          visibleGroups.map((group) => {
+            const isCurrentDay = isToday(group.date);
 
-          return (
-            <View
-              key={group.date.toISOString()}
-              className="mb-4 flex-row items-start"
-              onLayout={(event) => {
-                dayOffsetsRef.current[group.date.toISOString()] =
-                  event.nativeEvent.layout.y;
-                if (!isCurrentDay) return;
-                todayYOffsetRef.current = event.nativeEvent.layout.y;
-              }}
-            >
-              <View className="mr-3 items-center" style={{ width: 48 }}>
-                <Text className="text-[11px] font-medium uppercase text-zinc-500">
-                  {format(group.date, "EEE")}
-                </Text>
-                <View
-                  className={`mt-1 h-8 w-8 items-center justify-center rounded-full ${
-                    isCurrentDay ? "bg-blue-600" : "bg-transparent"
-                  }`}
-                >
-                  <Text
-                    className={`text-lg font-semibold ${
-                      isCurrentDay
-                        ? "text-white"
-                        : "text-zinc-800 dark:text-zinc-100"
+            return (
+              <View
+                key={group.date.toISOString()}
+                className="mb-5 flex-row items-start"
+                onLayout={(event) => {
+                  dayOffsetsRef.current[group.date.toISOString()] =
+                    event.nativeEvent.layout.y;
+                  if (!isCurrentDay) return;
+                  todayYOffsetRef.current = event.nativeEvent.layout.y;
+                }}
+              >
+                <View className="mr-3 items-center" style={{ width: 48 }}>
+                  <Text className="text-[11px] font-medium uppercase text-zinc-500">
+                    {format(group.date, "EEE")}
+                  </Text>
+                  <View
+                    className={`mt-1 h-8 w-8 items-center justify-center rounded-full ${
+                      isCurrentDay ? "bg-blue-600" : "bg-zinc-100 dark:bg-zinc-800"
                     }`}
                   >
-                    {format(group.date, "d")}
+                    <Text
+                      className={`text-base font-semibold ${
+                        isCurrentDay
+                          ? "text-white"
+                          : "text-zinc-800 dark:text-zinc-100"
+                      }`}
+                    >
+                      {format(group.date, "d")}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-1">
+                  <Text className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    {format(group.date, "MMMM d")}
                   </Text>
+                  <View className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                    {group.events.map((event, index) => {
+                      const color =
+                        calendars.find((calendar) => calendar.id === event.calendarId)
+                          ?.color || "#0EA5E9";
+
+                      return (
+                        <View
+                          key={`${group.date.toISOString()}-${event.id}`}
+                          className="px-4 py-3"
+                          style={{
+                            backgroundColor: hexToRgba(color, 0.1),
+                            borderTopWidth: index === 0 ? 0 : 1,
+                            borderTopColor: "rgba(228, 228, 231, 0.7)",
+                          }}
+                        >
+                          <View className="flex-row items-center gap-2">
+                            <View
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: color }}
+                            />
+                            <Text
+                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                              numberOfLines={1}
+                            >
+                              {event.title || "Untitled"}
+                            </Text>
+                            <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                              {formatEventTime(event)}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
                 </View>
               </View>
-
-              <View className="flex-1 gap-2">
-                {group.events.length === 0 ? (
-                  <View className="rounded-2xl border border-dashed border-zinc-300 px-4 py-3 dark:border-zinc-700">
-                    <Text className="text-sm text-zinc-500">No events</Text>
-                  </View>
-                ) : (
-                  group.events.map((event) => {
-                    const color =
-                      calendars.find((calendar) => calendar.id === event.calendarId)
-                        ?.color || "#0EA5E9";
-
-                    return (
-                      <View
-                        key={`${group.date.toISOString()}-${event.id}`}
-                        className="rounded-2xl border px-4 py-3"
-                        style={{
-                          backgroundColor: hexToRgba(color, 0.16),
-                          borderColor: hexToRgba(color, 0.42),
-                        }}
-                      >
-                        <View className="mb-1 flex-row items-center gap-2">
-                          <View
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: color }}
-                          />
-                          <Text
-                            className="text-base font-semibold text-zinc-900 dark:text-zinc-100"
-                            numberOfLines={1}
-                          >
-                            {event.title || "Untitled"}
-                          </Text>
-                        </View>
-                        <Text
-                          className="text-sm text-zinc-700 dark:text-zinc-300"
-                          numberOfLines={1}
-                        >
-                          {formatEventTime(event)}
-                        </Text>
-                      </View>
-                    );
-                  })
-                )}
-              </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </ScrollView>
     </View>
   );
