@@ -1,82 +1,74 @@
+import AgendaComponent from "@/components/schedule/agenda";
 import { useCalendar } from "@/stores/use-calendar";
 import { HeaderButton } from "@react-navigation/elements";
-import { add, format, getDate, getDay, set, startOfToday } from "date-fns";
+import {
+  addDays,
+  endOfDay,
+  format,
+  isSameDay,
+  startOfDay,
+  startOfToday,
+} from "date-fns";
 import * as Calendar from "expo-calendar";
 import { Redirect, Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Calendar as RNCalendar,
-  CalendarList,
-  Agenda,
-} from "react-native-calendars";
+import React, { useEffect, useMemo, useState } from "react";
+import { Text, useColorScheme, View } from "react-native";
+
+function toDate(value: string | Date | undefined) {
+  if (!value) return new Date();
+  return value instanceof Date ? value : new Date(value);
+}
 
 export default function ScheduleScreen() {
   const colorScheme = useColorScheme();
   const router = useRouter();
 
+  const [selectedDate, setSelectedDate] = useState(startOfToday());
+  const [visibleDate, setVisibleDate] = useState(startOfToday());
   const [events, setEvents] = useState<Calendar.Event[]>([]);
 
-  // Store
   const eventUpdated = useCalendar((state) => state.eventUpdated);
   const updateEvents = useCalendar((state) => state.updateEvents);
   const setup = useCalendar((state) => state.setup);
   const calendars = useCalendar((state) => state.calendars);
 
-  const startDate = startOfToday();
-  const endDate = add(startDate, { days: 1 });
-
-  function getDayAsString() {
-    const d = getDay(new Date());
-    switch (d) {
-      case 1:
-        return "Monday";
-      case 2:
-        return "Tuesday";
-      case 3:
-        return "Wednesday";
-      case 4:
-        return "Thursday";
-      case 5:
-        return "Friday";
-      case 6:
-        return "Saturday";
-      case 0:
-        return "Sunday"; // getDay returns 0 for Sunday
-      default:
-        return "Monday";
-    }
-  }
-
-  const insets = useSafeAreaInsets();
+  const startDate = startOfDay(addDays(selectedDate, -90));
+  const endDate = endOfDay(addDays(selectedDate, 180));
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
-      if (status === "granted") {
-        const eventsPerCalendar = await Promise.all(
-          calendars.map((calendar: Calendar.Calendar) =>
-            Calendar.getEventsAsync([calendar.id], startDate, endDate),
-          ),
-        );
-
-        if (cancelled) return;
-
-        setEvents(eventsPerCalendar.flat());
-        updateEvents(false);
-
-        console.log("Calendars and events fetched successfully");
+      if (status !== "granted") {
+        if (!cancelled) setEvents([]);
+        return;
       }
+
+      const eventsPerCalendar = await Promise.all(
+        calendars.map((calendar: Calendar.Calendar) =>
+          Calendar.getEventsAsync([calendar.id], startDate, endDate),
+        ),
+      );
+
+      if (cancelled) return;
+
+      setEvents(eventsPerCalendar.flat());
+      updateEvents(false);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [eventUpdated, updateEvents, startDate, endDate]);
+  }, [calendars, endDate, eventUpdated, startDate, updateEvents]);
+
+  const selectedDayCount = useMemo(
+    () =>
+      events.filter((event) => isSameDay(toDate(event.startDate), visibleDate))
+        .length,
+    [events, visibleDate],
+  );
 
   if (!setup) return <Redirect href={"/setup"} />;
 
@@ -84,17 +76,17 @@ export default function ScheduleScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "My home",
+          title: "Schedule",
           headerShadowVisible: false,
           headerStyle: {
             backgroundColor: colorScheme === "dark" ? "#18181B" : "#FCFCFC",
           },
           headerTitle: () => (
             <View className="items-center">
-              <Text className="text-muted">Welcome User</Text>
+              <Text className="text-muted">{format(visibleDate, "MMMM yyyy")}</Text>
               <Text className="text-lg dark:text-white">
-                You have <Text className="font-semibold">{events.length}</Text>{" "}
-                events today
+                <Text className="font-semibold">{selectedDayCount}</Text> events on{" "}
+                {format(visibleDate, "MMM d")}
               </Text>
             </View>
           ),
@@ -120,66 +112,15 @@ export default function ScheduleScreen() {
           ),
         }}
       />
-      <View className="flex-1 flex-col items-center justify-center gap-16 bg-[#FCFCFC] dark:bg-[#18181B]">
-        {/*<View className="items-center gap-2">
-          <Text className="text-2xl text-muted">{getDayAsString()}</Text>
-          <Text className="text-9xl text-foreground">
-            {getDate(new Date())}
-          </Text>
-        </View>*/}
-        <Agenda
-          // The list of items that have to be displayed in agenda. If you want to render item as empty date
-          // the value of date key has to be an empty array []. If there exists no value for date key it is
-          // considered that the date in question is not yet loaded
-          items={{
-            "2026-01-24": [{ name: "item 1 - any js object" }],
-            "2026-01-25": [{ name: "item 2 - any js object", height: 80 }],
-            "2026-01-26": [],
-            "2026-01-27": [
-              { name: "item 3 - any js object" },
-              { name: "any js object" },
-            ],
-          }}
-          // Render items
-          renderItem={(item) => (
-            <TouchableOpacity style={[{ height: item.height }]}>
-              <Text>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          // Agenda container style
-          style={{ width: "100%", height: "100%" }}
+
+      <View className="flex-1 bg-[#FCFCFC] dark:bg-[#18181B]">
+        <AgendaComponent
+          events={events}
+          calendars={calendars}
+          selectedDate={selectedDate}
+          onChangeDate={setSelectedDate}
+          onVisibleDateChange={setVisibleDate}
         />
-        {/*{events.length > 0 && events !== undefined && (
-          <View className="gap-2">
-            {events.map((event) => (
-              <View
-                key={event.id}
-                className="flex flex-row items-center justify-center gap-4"
-              >
-                <View
-                  style={{
-                    backgroundColor:
-                      calendars.find((c) => c.id === event.calendarId)?.color ||
-                      "red",
-                    width: 10,
-                    height: 10,
-                    borderRadius: 100,
-                  }}
-                ></View>
-                <Text
-                  style={{ fontSize: 16, fontWeight: "500" }}
-                  className="text-foreground"
-                >
-                  {event.title}
-                </Text>
-                <Text className="text-muted">
-                  {format(event.startDate, "h:mm a")}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}*/}
-        <View></View>
       </View>
     </>
   );
