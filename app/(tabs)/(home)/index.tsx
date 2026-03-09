@@ -1,11 +1,11 @@
-import { useCalendar } from "@/stores/use-calendar";
-import { HeaderButton } from "@react-navigation/elements";
-import { add, format, getDate, getDay, startOfToday } from "date-fns";
+import {useCalendar} from "@/stores/use-calendar";
+import {HeaderButton} from "@react-navigation/elements";
+import {add, format, getDate, getDay, startOfToday} from "date-fns";
 import * as Calendar from "expo-calendar";
-import { Redirect, Stack, useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, useColorScheme, View } from "react-native";
+import {Redirect, Stack, useRouter} from "expo-router";
+import {SymbolView} from "expo-symbols";
+import React, {useEffect, useState} from "react";
+import {Pressable, ScrollView, Text, useColorScheme, View} from "react-native";
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const calendars = useCalendar((state) => state.calendars);
 
   const startDate = startOfToday();
-  const endDate = add(startDate, { days: 1 });
+  const endDate = add(startDate, {days: 1});
 
   function getDayAsString() {
     const d = getDay(new Date());
@@ -46,7 +46,7 @@ export default function HomeScreen() {
   }
 
   async function openNativeCreateEvent() {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    const {status} = await Calendar.requestCalendarPermissionsAsync();
     if (status !== "granted") return;
 
     const result = await Calendar.createEventInCalendarAsync();
@@ -57,7 +57,7 @@ export default function HomeScreen() {
     let cancelled = false;
 
     (async () => {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      const {status} = await Calendar.requestCalendarPermissionsAsync();
       if (status !== "granted") return;
 
       const eventsPerCalendar = await Promise.all(
@@ -160,15 +160,11 @@ export default function HomeScreen() {
         </View>
 
         {events.length > 0 ? (
-          <View className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <View className="w-full max-w-[520px] overflow-y-auto">
             {events.map((event, index) => (
               <View
                 key={event.id}
-                className="flex-row items-center gap-3 px-4 py-3"
-                style={{
-                  borderTopWidth: index === 0 ? 0 : 1,
-                  borderTopColor: "rgba(228, 228, 231, 0.7)",
-                }}
+                className="flex-row items-center justify-center gap-4 py-1"
               >
                 <View
                   style={{
@@ -179,7 +175,7 @@ export default function HomeScreen() {
                     borderRadius: 999,
                   }}
                 />
-                <Text className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100" numberOfLines={1}>
+                <Text className="text-base font-medium text-zinc-900 dark:text-zinc-100" numberOfLines={1}>
                   {event.title || "Untitled"}
                 </Text>
                 <Text className="text-xs text-zinc-500 dark:text-zinc-400">
