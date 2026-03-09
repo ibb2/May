@@ -1,6 +1,6 @@
 import AgendaComponent from "@/components/schedule/agenda";
-import { useCalendar } from "@/stores/use-calendar";
-import { HeaderButton } from "@react-navigation/elements";
+import {useCalendar} from "@/stores/use-calendar";
+import {HeaderButton} from "@react-navigation/elements";
 import {
   addDays,
   endOfDay,
@@ -10,10 +10,10 @@ import {
   startOfToday,
 } from "date-fns";
 import * as Calendar from "expo-calendar";
-import { Redirect, Stack, useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import {Redirect, Stack, useRouter} from "expo-router";
+import {SymbolView} from "expo-symbols";
+import React, {useEffect, useMemo, useState} from "react";
+import {Pressable, Text, useColorScheme, View} from "react-native";
 
 function toDate(value: string | Date | undefined) {
   if (!value) return new Date();
@@ -37,7 +37,7 @@ export default function ScheduleScreen() {
   const endDate = endOfDay(addDays(selectedDate, 180));
 
   async function openNativeCreateEvent() {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    const {status} = await Calendar.requestCalendarPermissionsAsync();
     if (status !== "granted") return;
 
     const result = await Calendar.createEventInCalendarAsync();
@@ -48,7 +48,7 @@ export default function ScheduleScreen() {
     let cancelled = false;
 
     (async () => {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      const {status} = await Calendar.requestCalendarPermissionsAsync();
       if (status !== "granted") {
         if (!cancelled) setEvents([]);
         return;
@@ -101,10 +101,7 @@ export default function ScheduleScreen() {
           headerLeft: () => (
             <HeaderButton onPress={() => router.push("/(modal)/settings-home")}>
               <View
-                className="h-9 w-9 items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: colorScheme === "dark" ? "#27272A" : "#F4F4F5",
-                }}
+                className="items-center justify-center rounded-full"
               >
                 <SymbolView
                   name="gear"
@@ -118,9 +115,6 @@ export default function ScheduleScreen() {
           headerRight: () => (
             <Pressable
               className="flex-row items-center gap-1 rounded-full px-3 py-2"
-              style={{
-                backgroundColor: colorScheme === "dark" ? "#27272A" : "#F4F4F5",
-              }}
               onPress={openNativeCreateEvent}
             >
               <SymbolView

@@ -6,9 +6,9 @@ import {
   startOfDay,
 } from "date-fns";
 import * as Calendar from "expo-calendar";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {Pressable, ScrollView, Text, View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 type Props = {
   events: Calendar.Event[];
@@ -37,9 +37,9 @@ function hexToRgba(hexColor: string, alpha: number) {
   const normalized =
     hex.length === 3
       ? hex
-          .split("")
-          .map((char) => `${char}${char}`)
-          .join("")
+        .split("")
+        .map((char) => `${char}${char}`)
+        .join("")
       : hex;
 
   const bigint = Number.parseInt(normalized, 16);
@@ -95,7 +95,7 @@ export default function AgendaComponent({
 
   const days = useMemo(() => {
     const totalDays = differenceInCalendarDays(rangeEnd, rangeStart) + 1;
-    return Array.from({ length: totalDays }, (_, index) =>
+    return Array.from({length: totalDays}, (_, index) =>
       addDays(rangeStart, index),
     );
   }, [rangeEnd, rangeStart]);
@@ -113,7 +113,10 @@ export default function AgendaComponent({
   }, [days, events]);
 
   const visibleGroups = useMemo(
-    () => groups.filter((group) => group.events.length > 0),
+    () =>
+      groups.filter(
+        (group) => group.events.length > 0 || isToday(group.date),
+      ),
     [groups],
   );
 
@@ -177,7 +180,7 @@ export default function AgendaComponent({
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
-        contentContainerStyle={{ padding: 12, paddingBottom: insets.bottom + 96 }}
+        contentContainerStyle={{padding: 12, paddingBottom: insets.bottom + 96}}
         onContentSizeChange={(_, contentHeight) => {
           const previousHeight = contentHeightRef.current;
           contentHeightRef.current = contentHeight;
@@ -202,11 +205,13 @@ export default function AgendaComponent({
           }
 
           if (pendingJumpToTodayRef.current) {
-            pendingJumpToTodayRef.current = false;
-            scrollViewRef.current?.scrollTo({
-              y: Math.max(todayYOffsetRef.current - 120, 0),
-              animated: true,
-            });
+            if (todayYOffsetRef.current > 0) {
+              pendingJumpToTodayRef.current = false;
+              scrollViewRef.current?.scrollTo({
+                y: Math.max(todayYOffsetRef.current - 120, 0),
+                animated: true,
+              });
+            }
           }
 
           if (contentHeight === previousHeight) {
@@ -218,8 +223,8 @@ export default function AgendaComponent({
             isPaginatingRef.current = false;
           }, 0);
         }}
-        onScroll={({ nativeEvent }) => {
-          const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
+        onScroll={({nativeEvent}) => {
+          const {contentOffset, layoutMeasurement, contentSize} = nativeEvent;
           scrollYRef.current = contentOffset.y;
 
           if (contentOffset.y < 80) paginateBackward();
@@ -271,23 +276,30 @@ export default function AgendaComponent({
                     event.nativeEvent.layout.y;
                   if (!isCurrentDay) return;
                   todayYOffsetRef.current = event.nativeEvent.layout.y;
+                  if (pendingJumpToTodayRef.current) {
+                    pendingJumpToTodayRef.current = false;
+                    requestAnimationFrame(() => {
+                      scrollViewRef.current?.scrollTo({
+                        y: Math.max(todayYOffsetRef.current - 120, 0),
+                        animated: true,
+                      });
+                    });
+                  }
                 }}
               >
-                <View className="mr-3 items-center" style={{ width: 48 }}>
+                <View className="mr-3 items-center" style={{width: 48}}>
                   <Text className="text-[11px] font-medium uppercase text-zinc-500">
                     {format(group.date, "EEE")}
                   </Text>
                   <View
-                    className={`mt-1 h-8 w-8 items-center justify-center rounded-full ${
-                      isCurrentDay ? "bg-blue-600" : "bg-zinc-100 dark:bg-zinc-800"
-                    }`}
+                    className={`mt-1 h-8 w-8 items-center justify-center rounded-full ${isCurrentDay ? "bg-blue-600" : "bg-zinc-100 dark:bg-zinc-800"
+                      }`}
                   >
                     <Text
-                      className={`text-base font-semibold ${
-                        isCurrentDay
+                      className={`text-base font-semibold ${isCurrentDay
                           ? "text-white"
                           : "text-zinc-800 dark:text-zinc-100"
-                      }`}
+                        }`}
                     >
                       {format(group.date, "d")}
                     </Text>
@@ -317,7 +329,7 @@ export default function AgendaComponent({
                           <View className="flex-row items-center gap-2">
                             <View
                               className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: color }}
+                              style={{backgroundColor: color}}
                             />
                             <Text
                               className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"

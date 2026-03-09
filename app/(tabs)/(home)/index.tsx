@@ -101,10 +101,7 @@ export default function HomeScreen() {
           headerLeft: () => (
             <HeaderButton onPress={() => router.push("/(modal)/settings-home")}>
               <View
-                className="h-9 w-9 items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: colorScheme === "dark" ? "#27272A" : "#F4F4F5",
-                }}
+                className="items-center justify-center rounded-full"
               >
                 <SymbolView
                   name="gear"
@@ -118,9 +115,6 @@ export default function HomeScreen() {
           headerRight: () => (
             <Pressable
               className="flex-row items-center gap-1 rounded-full px-3 py-2"
-              style={{
-                backgroundColor: colorScheme === "dark" ? "#27272A" : "#F4F4F5",
-              }}
               onPress={openNativeCreateEvent}
             >
               <SymbolView
